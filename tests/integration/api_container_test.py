@@ -542,14 +542,18 @@ class VolumeBindTest(BaseAPIIntegrationTest):
         inspect_data = self.client.inspect_container(container)
         self.check_container_data(inspect_data, False)
 
-
     def test_create_with_binds_rw_rshared(self):
-        container = self.run_with_volume_propagation(
+        self.run_with_volume_propagation(
             False,
             'rshared',
             TEST_IMG,
             ['touch', os.path.join(self.mount_dest, self.filename)],
-            
+        )
+        container = self.run_with_volume_propagation(
+            True,
+            'rshared',
+            TEST_IMG,
+            ['ls', self.mount_dest],
         )
         logs = self.client.logs(container).decode('utf-8')
         assert self.filename in logs
@@ -638,7 +642,7 @@ class VolumeBindTest(BaseAPIIntegrationTest):
             ),
             **kwargs
         )
-        
+
     def run_with_volume_propagation(self, ro, propagation, *args, **kwargs):
         return self.run_container(
             *args,
